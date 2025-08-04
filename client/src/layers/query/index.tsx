@@ -4,6 +4,8 @@ import {
   LayersOutlined,
   RouteOutlined,
   TripOriginOutlined as StartIcon,
+  PottedPlantOutlined as PlantIcon,
+  WaterDropOutlined as WaterIcon,
 } from "@mui-symbols-material/w400";
 import { Box, Typography as Type } from "@mui/material";
 import { FeaturePicker } from "components/app-bar/FeaturePicker";
@@ -42,8 +44,8 @@ const mapValuesDeep = (v: any, callback: (t: any) => any): any =>
   isArray(v)
     ? map(v, (v) => mapValuesDeep(v, callback))
     : isObject(v)
-    ? mapValues(v, (v) => mapValuesDeep(v, callback))
-    : callback(v);
+      ? mapValues(v, (v) => mapValuesDeep(v, callback))
+      : callback(v);
 async function findConnection(
   connections: Connection[],
   algorithm: string,
@@ -63,6 +65,8 @@ export type QueryLayerData = {
   query?: any;
   start?: number;
   end?: number;
+  plants?: number[];
+  taps?: number[];
   algorithm?: string;
 } & TraceLayerData;
 
@@ -165,7 +169,14 @@ export const controller = {
   service: withProduce(({ value, produce, onChange }) => {
     const TraceLayerService = traceController.service;
     const notify = useSnackbar();
-    const { algorithm, mapLayerKey, start, end } = value?.source ?? {};
+    const { algorithm, mapLayerKey, start, end, plants, taps } = value?.source ?? {};
+    if (!algorithm || !mapLayerKey || !start || !end) {
+      return (
+        <Type variant="body2" color="text.secondary">
+          Select an algorithm and a map layer to run a query.
+        </Type>
+      );
+    }
     const [{ layers: layers }] = useLayers();
     const [connections] = useConnections();
     const [{ algorithms }] = useFeatures();
@@ -199,6 +210,8 @@ export const controller = {
                   {
                     start: start ?? 0,
                     end: end ?? 0,
+                    plants: plants ?? [],
+                    taps: taps ?? [],
                   },
                 ],
                 mapURI: `map:${encodeURIComponent(content)}` as const,
@@ -270,7 +283,7 @@ export const controller = {
           }
         })
       );
-    }, [layers]);
+    }, [layers, event]);
     const menu = useMemo(
       () =>
         !!layer &&
@@ -285,7 +298,8 @@ export const controller = {
                   [`${key}-${next?.key}-source`]: {
                     primary: `Set as source`,
                     secondary: next?.name,
-                    action: () =>
+                    action: () => {
+                      console.log("Setting source", next);
                       setLayer(
                         produce(layer, (l) => {
                           set(l, "source.start", next?.node);
@@ -293,7 +307,8 @@ export const controller = {
                           set(l, "source.mapLayerKey", next?.key);
                           set(l, "source.trace", undefined);
                         })
-                      ),
+                      )
+                    },
                     icon: <StartIcon sx={{ transform: "scale(0.5)" }} />,
                   },
                   [`${key}-${next?.key}-destination`]: {
@@ -309,6 +324,35 @@ export const controller = {
                         })
                       ),
                     icon: <DestinationIcon />,
+                  },
+                  // add plants for plant-watering problem
+                  [`${key}-${next?.key}-plants`]: {
+                    primary: `Set as plant`,
+                    secondary: next?.name,
+                    action: () =>
+                      setLayer(
+                        produce(layer, (l) => {
+                          set(l, "source.plants", [...(l.source?.plants ?? []), next?.node]);
+                          set(l, "source.query", undefined);
+                          set(l, "source.mapLayerKey", next?.key);
+                          set(l, "source.trace", undefined);
+                        })
+                      ),
+                    icon: <PlantIcon />
+                  },
+                  [`${key}-${next?.key}-taps`]: {
+                    primary: `Set as tap`,
+                    secondary: next?.name,
+                    action: () =>
+                      setLayer(
+                        produce(layer, (l) => {
+                          set(l, "source.taps", [...(l.source?.taps ?? []), next?.node]);
+                          set(l, "source.query", undefined);
+                          set(l, "source.mapLayerKey", next?.key);
+                          set(l, "source.trace", undefined);
+                        })
+                      ),
+                    icon: <WaterIcon />
                   },
                 }),
                 {}
@@ -341,9 +385,8 @@ export const controller = {
             ...mapValuesDeep(query, (t) =>
               typeof t === "string"
                 ? t.length > maxStringPropLength
-                  ? `${truncate(t, { length: maxStringPropLength })} (${
-                      t.length
-                    } characters)`
+                  ? `${truncate(t, { length: maxStringPropLength })} (${t.length
+                  } characters)`
                   : t
                 : t
             ),

@@ -69,6 +69,9 @@ export const colorsHex: EventTypeColors = {
   generating: amber[tint],
   closing: pink[tint],
   end: blue["A400"],
+  move: blue["A400"],
+  pour: green["A400"],
+  pick: red["A400"],
 };
 
 export const colors: { [K in TraceEventType]: number } = mapValues(
