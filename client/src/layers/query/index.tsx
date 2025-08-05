@@ -50,12 +50,14 @@ const mapValuesDeep = (v: any, callback: (t: any) => any): any =>
 async function findConnection(
   connections: Connection[],
   algorithm: string,
-  format: string
+  format: string,
+  problemType: string,
 ) {
   for (const connection of connections) {
     const algorithms = await connection.transport().call("features/algorithms");
     const formats = await connection.transport().call("features/formats");
-    if (find(algorithms, { id: algorithm }) && find(formats, { id: format })) {
+    const problemTypes = await connection.transport().call("features/problemTypes");
+    if (find(algorithms, { id: algorithm }) && find(formats, { id: format }) && find(problemTypes, { id: problemType })) {
       return connection;
     }
   }
@@ -70,19 +72,25 @@ export type QueryLayerData = {
   pourAmounts: number[];
   taps?: number[];
   algorithm?: string;
+  problemType?: string;
 } & TraceLayerData;
 
+const commonCommands = ['source', 'clear']
 
-export type PlantQueryLayerData = {
-  mapLayerKey?: string;
-  query?: any;
-  start?: number;
-  end?: number;
-  plants: number[][];
-  pourAmounts: number[];
-  taps?: number[][];
-  algorithm?: string;
-} & TraceLayerData;
+
+type ProblemType = "plant-watering" | "pathfinding";
+const problemTypeCommands: Record<ProblemType, string[]> = {
+  "plant-watering": [
+    ...commonCommands,
+    "taps",
+    "plants",
+  ],
+  "pathfinding": [
+    ...commonCommands,
+    "destination",
+    "clear",
+  ],
+}
 
 const maxStringPropLength = 40;
 export const controller = {
@@ -103,16 +111,39 @@ export const controller = {
     ]),
   editor: withProduce(({ value, produce }) => {
     const { algorithm } = value?.source ?? {};
+    const { problemType } = value?.source ?? {};
     const {
       layers,
       allLayers,
       layer: selectedLayer,
       key: mapLayerKey,
     } = useLayer(undefined, (c): c is MapLayer => c.source?.type === "map");
-    const [{ algorithms }] = useFeatures();
+    const [{ algorithms, problemTypes }] = useFeatures();
     const [connections] = useConnections();
     return (
       <>
+        <Option
+          label="Problem Type"
+          content={
+            <FeaturePicker
+              arrow
+              paper
+              icon={<RouteOutlined />}
+              label="Problem Type"
+              value={problemType}
+              items={problemTypes.map((c) => ({
+                ...c,
+                description: find(connections, { url: c.source })?.name,
+              }))}
+              onChange={async (v) =>
+                produce((p) => {
+                  console.log("Setting problemType", v, p);
+                  set(p, "source.problemType", v);
+                })
+              }
+            />
+          }
+        />
         <Option
           label="Algorithm"
           content={
@@ -173,10 +204,6 @@ export const controller = {
             {inferLayerName(selectedLayer)}
           </Type>
         )}
-        <Heading label="Preview" />
-        <Box sx={{ height: 240, mx: -2 }}>
-          <TracePreview trace={value?.source?.trace?.content} />
-        </Box>
         {(value?.source?.plants ?? []).map((plant, i) => (
           <Option
             key={`plant-pour-${i}`}
@@ -198,13 +225,25 @@ export const controller = {
             }
           />
         ))}
+        <Heading label="Preview" />
+        <Box sx={{ height: 240, mx: -2 }}>
+          <TracePreview trace={value?.source?.trace?.content} />
+        </Box>
       </>
     );
   }),
   service: withProduce(({ value, produce, onChange }) => {
     const TraceLayerService = traceController.service;
     const notify = useSnackbar();
-    const { algorithm, mapLayerKey, start, end, plants, taps, pourAmounts } = value?.source ?? {};
+    const { algorithm,
+      problemType,
+      mapLayerKey,
+      start,
+      end,
+      plants,
+      taps,
+      pourAmounts
+    } = value?.source ?? {};
     // if (!algorithm || !mapLayerKey || !start || !end) {
     //   return (
     //     <Type variant="body2" color="text.secondary">
@@ -225,14 +264,15 @@ export const controller = {
     const { result: mapContent } = useMapContent(mapLayer?.source?.map);
     useEffectWhenAsync(
       async (signal) => {
-        if (mapLayer && mapContent && algorithm) {
+        if (mapLayer && mapContent && algorithm && problemType) {
           const { format } = mapLayer?.source?.map ?? {};
           const { content } = mapContent ?? {};
           if (format && content) {
             const connection = await findConnection(
               connections,
               algorithm,
-              format
+              format,
+              problemType,
             );
             const algorithmInfo = find(algorithms, { id: algorithm });
             if (connection) {
@@ -285,16 +325,22 @@ export const controller = {
         notify,
         value,
         algorithms,
+        problemType,
+        pourAmounts,
       ],
-      [mapLayer, mapContent, connections, algorithm, start, end, taps, plants]
+      [mapLayer, mapContent, connections, algorithm, problemType, start, end, taps, plants, pourAmounts]
     );
-    return <>{<TraceLayerService value={value} onChange={onChange} />}</>;
+    return <TraceLayerService
+      value={value as Layer<TraceLayerData>}
+      onChange={onChange ? onChange as unknown as (key: (value: Layer<TraceLayerData>) => Layer<TraceLayerData>) => void : undefined}
+    />;
   }),
   inferName: (l) => l.source?.trace?.name ?? "Untitled Query",
   provideSelectionInfo: ({ children, event, layer: key }) => {
     const TraceLayerSelectionInfoProvider =
       traceController.provideSelectionInfo;
-    const { layer, setLayer, layers } = useLayer<PlantQueryLayerData>(key);
+    const { layer, setLayer, layers } = useLayer<QueryLayerData>(key);
+    const { problemType } = layer?.source ?? {};
     const mapLayerData = useMemo(() => {
       const filteredLayers = filter(layers, {
         source: { type: "map" },
@@ -322,102 +368,116 @@ export const controller = {
         })
       );
     }, [layers, event]);
-    const menu = useMemo(
-      () =>
-        !!layer &&
-        !!mapLayerData.length && {
-          [layer.key]: {
-            primary: inferLayerName(layer),
-            items: {
-              ...reduce(
-                mapLayerData,
-                (prev, next) => ({
-                  ...prev,
-                  [`${key}-${next?.key}-source`]: {
-                    primary: `Set as source`,
-                    secondary: next?.name,
-                    action: () => {
-                      console.log("Setting source", next);
-                      setLayer(
-                        produce(layer, (l) => {
-                          set(l, "source.start", next?.node);
-                          set(l, "source.query", undefined);
-                          set(l, "source.mapLayerKey", next?.key);
-                          set(l, "source.trace", undefined);
-                        })
-                      )
-                    },
-                    icon: <StartIcon sx={{ transform: "scale(0.5)" }} />,
-                  },
-                  [`${key}-${next?.key}-destination`]: {
-                    primary: `Set as destination`,
-                    secondary: next?.name,
-                    action: () =>
-                      setLayer(
-                        produce(layer, (l) => {
-                          set(l, "source.end", next?.node);
-                          set(l, "source.query", undefined);
-                          set(l, "source.mapLayerKey", next?.key);
-                          set(l, "source.trace", undefined);
-                        })
-                      ),
-                    icon: <DestinationIcon />,
-                  },
-                  // add plants for plant-watering problem
-                  [`${key}-${next?.key}-plants`]: {
-                    primary: `Set as plant`,
-                    secondary: next?.name,
-                    action: () =>
-                      setLayer(
-                        produce(layer, (l) => {
-                          set(l, "source.plants", [...(l.source?.plants ?? []), next?.node]);
-                          set(l, "source.query", undefined);
-                          set(l, "source.mapLayerKey", next?.key);
-                          set(l, "source.trace", undefined);
-                        })
-                      ),
-                    icon: <PlantIcon />
-                  },
-                  [`${key}-${next?.key}-taps`]: {
-                    primary: `Set as tap`,
-                    secondary: next?.name,
-                    action: () =>
-                      setLayer(
-                        produce(layer, (l) => {
-                          set(l, "source.taps", [...(l.source?.taps ?? []), next?.node]);
-                          set(l, "source.query", undefined);
-                          set(l, "source.mapLayerKey", next?.key);
-                          set(l, "source.trace", undefined);
-                        })
-                      ),
-                    icon: <WaterIcon />
-                  },
-                  [`${key}-${next?.key}-clear`]: {
-                    primary: `Clear`,
-                    secondary: next?.name,
-                    action: () =>
-                      setLayer(
-                        produce(layer, (l) => {
-                          set(l, "source.start", undefined);
-                          set(l, "source.end", undefined);
-                          set(l, "source.plants", []);
-                          set(l, "source.taps", []);
-                          set(l, "source.query", undefined);
-                          set(l, "source.mapLayerKey", next?.key);
-                          set(l, "source.trace", undefined);
-                          // TOFIX empty also pourAmounts (don't know how to do from here)
-                        })
-                      ),
-                    icon: <DeleteIcon />,
-                  },
-                }),
-                {}
-              ),
-            },
-          },
+    const menu = useMemo(() => {
+      if (!layer || !mapLayerData.length) return false;
+      if (!problemType) return false;
+      const allowedCommands = problemTypeCommands[problemType as ProblemType] ?? [];
+      console.log("Allowed commands", allowedCommands);
+      const items = reduce(
+        mapLayerData,
+        (prev, next) => {
+          const actions: Record<string, any> = {};
+
+          if (allowedCommands.includes("source")) {
+            actions[`${key}-${next?.key}-source`] = {
+              primary: `Set as source`,
+              secondary: next?.name,
+              action: () =>
+                setLayer(
+                  produce(layer, (l) => {
+                    set(l, "source.start", next?.node);
+                    set(l, "source.query", undefined);
+                    set(l, "source.mapLayerKey", next?.key);
+                    set(l, "source.trace", undefined);
+                  })
+                ),
+              icon: <StartIcon sx={{ transform: "scale(0.5)" }} />,
+            };
+          }
+
+          if (allowedCommands.includes("destination")) {
+            actions[`${key}-${next?.key}-destination`] = {
+              primary: `Set as destination`,
+              secondary: next?.name,
+              action: () =>
+                setLayer(
+                  produce(layer, (l) => {
+                    set(l, "source.end", next?.node);
+                    set(l, "source.query", undefined);
+                    set(l, "source.mapLayerKey", next?.key);
+                    set(l, "source.trace", undefined);
+                  })
+                ),
+              icon: <DestinationIcon />,
+            };
+          }
+
+          if (allowedCommands.includes("plants")) {
+            actions[`${key}-${next?.key}-plants`] = {
+              primary: `Set as plant`,
+              secondary: next?.name,
+              action: () =>
+                setLayer(
+                  produce(layer, (l) => {
+                    set(l, "source.plants", [...(l.source?.plants ?? []), next?.node]);
+                    set(l, "source.query", undefined);
+                    set(l, "source.mapLayerKey", next?.key);
+                    set(l, "source.trace", undefined);
+                  })
+                ),
+              icon: <PlantIcon />,
+            };
+          }
+
+          if (allowedCommands.includes("taps")) {
+            actions[`${key}-${next?.key}-taps`] = {
+              primary: `Set as tap`,
+              secondary: next?.name,
+              action: () =>
+                setLayer(
+                  produce(layer, (l) => {
+                    set(l, "source.taps", [...(l.source?.taps ?? []), next?.node]);
+                    set(l, "source.query", undefined);
+                    set(l, "source.mapLayerKey", next?.key);
+                    set(l, "source.trace", undefined);
+                  })
+                ),
+              icon: <WaterIcon />,
+            };
+          }
+
+          if (allowedCommands.includes("clear")) {
+            actions[`${key}-${next?.key}-clear`] = {
+              primary: `Clear`,
+              secondary: next?.name,
+              action: () =>
+                setLayer(
+                  produce(layer, (l) => {
+                    set(l, "source.start", undefined);
+                    set(l, "source.end", undefined);
+                    set(l, "source.plants", []);
+                    set(l, "source.taps", []);
+                    set(l, "source.query", undefined);
+                    set(l, "source.mapLayerKey", next?.key);
+                    set(l, "source.trace", undefined);
+                  })
+                ),
+              icon: <DeleteIcon />,
+            };
+          }
+
+          return { ...prev, ...actions };
         },
-      [mapLayerData, layer, layers, setLayer]
-    );
+        {}
+      );
+
+      return {
+        [layer.key]: {
+          primary: inferLayerName(layer),
+          items,
+        },
+      };
+    }, [mapLayerData, layer, layers, setLayer, problemType]);
     return (
       <TraceLayerSelectionInfoProvider event={event} layer={key}>
         {(menuB) => children?.(merge(menuB, menu))}
@@ -453,4 +513,4 @@ export const controller = {
       ...traceController.getSources(layer),
     ];
   },
-} satisfies LayerController<"query", PlantQueryLayerData>
+} satisfies LayerController<"query", QueryLayerData>

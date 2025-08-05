@@ -10,6 +10,7 @@ export type Features = {
   maps: (FeatureDescriptorWithSource & { type: string })[];
   formats: FeatureDescriptorWithSource[];
   traces: FeatureDescriptorWithSource[];
+  problemTypes: FeatureDescriptorWithSource[];
 };
 
 export const [useFeatures, FeaturesProvider] = createSlice<Features>({
@@ -17,4 +18,5 @@ export const [useFeatures, FeaturesProvider] = createSlice<Features>({
   maps: [],
   formats: [],
   traces: [],
+  problemTypes: [],
 });

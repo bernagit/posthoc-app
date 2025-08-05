@@ -5,6 +5,7 @@ import {
   MapFeatureQueryMethod,
   MapsFeatureQueryMethod,
   MapTypeFeatureQueryMethod,
+  ProblemTypesFeatureQueryMethod,
   TraceFeatureQueryMethod,
   TracesFeatureQueryMethod,
 } from "./FeatureQuery";
@@ -24,4 +25,5 @@ export type NameMethodMap = Entry<CheckConnectionMethod> &
   Entry<PathfindingTaskMethod> &
   Entry<TraceFeatureQueryMethod> &
   Entry<ChangedFeatureQueryMethod> &
-  Entry<TracesFeatureQueryMethod>;
+  Entry<TracesFeatureQueryMethod> &
+  Entry<ProblemTypesFeatureQueryMethod>;

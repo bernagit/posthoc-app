@@ -40,6 +40,8 @@ export type TracesFeatureQuery = FeatureQuery<"traces">;
 
 export type ChangedFeatureQuery = FeatureQuery<"changed">;
 
+export type ProblemTypesFeatureQuery = FeatureQuery<"problemTypes">;
+
 //
 // ─── RESPONSE ───────────────────────────────────────────────────────────────────
 //
@@ -84,3 +86,8 @@ export type AlgorithmFeatureQueryMethod = Method<
 >;
 
 export type ChangedFeatureQueryMethod = Method<ChangedFeatureQuery>;
+
+export type ProblemTypesFeatureQueryMethod = Method<
+  ProblemTypesFeatureQuery,
+  FeatureDescriptorListResult
+>;

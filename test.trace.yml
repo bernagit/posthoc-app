@@ -1,0 +1,663 @@
+version: 1.0.5
+render:
+  context: {}
+  components:
+    tile:
+      - $: rect
+        width: 1
+        height: 1
+        x: "{{$.event.x}}"
+        y: "{{$.event.y}}"
+        fill: "{{ $.color[$.event.type] }}"
+        $if: ${{ $.event.type == "source" }}
+      - $: rect
+        width: 1
+        height: 1
+        x: "{{$.event.x}}"
+        y: "{{$.event.y}}"
+        fill: "{{ $.color[$.event.type] }}"
+        $if: ${{ $.event.type == "destination" }}
+      - $: rect
+        width: 1
+        height: 1
+        x: "{{$.event.x}}"
+        y: "{{$.event.y}}"
+        fill: "{{ $.color[$.event.type] }}"
+        $if: ${{ $.event.type == "plant" }}
+      - $: rect
+        width: 1
+        height: 1
+        x: "{{$.event.x}}"
+        y: "{{$.event.y}}"
+        fill: "{{ $.color[$.event.type] }}"
+        $if: ${{ $.event.type == "tap" }}
+      - $: rect
+        width: 1
+        height: 1
+        x: "{{$.event.x}}"
+        y: "{{$.event.y}}"
+        fill: "{{ $.color[$.event.type] }}"
+        $if: ${{ $.event.type == "move" }}
+      - $: rect
+        width: 1
+        height: 1
+        x: "{{$.event.x}}"
+        y: "{{$.event.y}}"
+        fill: "{{ $.color[$.event.type] }}"
+        $if: ${{ $.event.type == "pour" }}
+      - $: rect
+        width: 1
+        height: 1
+        x: "{{$.event.x}}"
+        y: "{{$.event.y}}"
+        fill: "{{ $.color[$.event.type] }}"
+        $if: ${{ $.event.type == "pick" }}
+  views:
+    main:
+      components:
+        - $: tile
+
+events:
+  - type: pick
+    id: 101
+    x: 2
+    y: 6
+    pId: 18446744073709551001
+    g: 10.1234
+    f: 0
+  - type: move
+    id: 102
+    x: 5
+    y: 7
+  - type: pour
+    id: 103
+    x: 1
+    y: 8
+    pId: 18446744073709551002
+    g: 5.4321
+    f: 1
+  - type: tap
+    id: 104
+    x: 6
+    y: 3
+    pId: 18446744073709551003
+    g: 7.8888
+    f: 2
+  - type: plant
+    id: 105
+    x: 9
+    y: 1
+    pId: 18446744073709551004
+    g: 4.4567
+    f: 1
+  - type: source
+    id: 106
+    x: 0
+    y: 0
+    pId: 18446744073709551005
+    g: 1.0000
+    f: 0
+  - type: destination
+    id: 107
+    x: 10
+    y: 10
+    pId: 18446744073709551006
+    g: 20.0000
+    f: 5
+  - type: move
+    id: 108
+    x: 4
+    y: 2
+  - type: pour
+    id: 109
+    x: 7
+    y: 3
+    pId: 18446744073709551007
+    g: 3.1415
+    f: 2
+  - type: pick
+    id: 110
+    x: 5
+    y: 5
+    pId: 18446744073709551008
+    g: 12.9876
+    f: 3
+  - type: move
+    id: 383
+    x: 10
+    y: 7
+    pId: 18446744073709551421
+    g: 18.7755
+    f: 1
+  - type: pour
+    id: 422
+    x: 0
+    y: 1
+    pId: 18446744073709551846
+    g: 13.6699
+    f: 1
+  - type: pick
+    id: 243
+    x: 8
+    y: 9
+    pId: 18446744073709551411
+    g: 16.1992
+    f: 5
+  - type: pour
+    id: 832
+    x: 8
+    y: 10
+    pId: 18446744073709551225
+    g: 1.6167
+    f: 5
+  - type: pick
+    id: 582
+    x: 0
+    y: 10
+    pId: 18446744073709551868
+    g: 18.3097
+    f: 1
+  - type: move
+    id: 138
+    x: 1
+    y: 10
+  - type: move
+    id: 579
+    x: 9
+    y: 10
+  - type: move
+    id: 707
+    x: 6
+    y: 7
+    pId: 18446744073709551553
+    g: 18.9329
+    f: 0
+  - type: pick
+    id: 813
+    x: 8
+    y: 8
+    pId: 18446744073709551076
+    g: 5.3277
+    f: 5
+  - type: move
+    id: 618
+    x: 9
+    y: 9
+  - type: move
+    id: 563
+    x: 5
+    y: 5
+    pId: 18446744073709551672
+    g: 17.6856
+    f: 1
+  - type: move
+    id: 786
+    x: 6
+    y: 0
+  - type: pick
+    id: 228
+    x: 7
+    y: 2
+    pId: 18446744073709551973
+    g: 1.7223
+    f: 0
+  - type: move
+    id: 879
+    x: 9
+    y: 1
+    pId: 18446744073709551951
+    g: 6.6913
+    f: 0
+  - type: pour
+    id: 556
+    x: 0
+    y: 8
+    pId: 18446744073709551063
+    g: 18.1993
+    f: 2
+  - type: pick
+    id: 667
+    x: 2
+    y: 3
+    pId: 18446744073709551750
+    g: 18.3338
+    f: 4
+  - type: pour
+    id: 581
+    x: 0
+    y: 10
+    pId: 18446744073709551635
+    g: 19.3762
+    f: 0
+  - type: pick
+    id: 996
+    x: 9
+    y: 0
+    pId: 18446744073709551005
+    g: 1.4402
+    f: 5
+  - type: pick
+    id: 688
+    x: 9
+    y: 4
+    pId: 18446744073709551419
+    g: 17.4714
+    f: 2
+  - type: pour
+    id: 947
+    x: 1
+    y: 3
+    pId: 18446744073709551325
+    g: 3.8999
+    f: 4
+  - type: pour
+    id: 928
+    x: 7
+    y: 4
+    pId: 18446744073709551697
+    g: 17.5504
+    f: 1
+  - type: pour
+    id: 306
+    x: 9
+    y: 10
+    pId: 18446744073709551051
+    g: 17.7355
+    f: 4
+  - type: move
+    id: 549
+    x: 0
+    y: 2
+  - type: pour
+    id: 933
+    x: 2
+    y: 9
+    pId: 18446744073709551460
+    g: 10.6314
+    f: 4
+  - type: pick
+    id: 523
+    x: 10
+    y: 7
+    pId: 18446744073709551290
+    g: 10.1108
+    f: 1
+  - type: pour
+    id: 219
+    x: 3
+    y: 0
+    pId: 18446744073709551109
+    g: 14.3927
+    f: 4
+  - type: pick
+    id: 541
+    x: 1
+    y: 3
+    pId: 18446744073709551208
+    g: 17.1718
+    f: 1
+  - type: move
+    id: 445
+    x: 9
+    y: 10
+  - type: pick
+    id: 993
+    x: 4
+    y: 7
+    pId: 18446744073709551191
+    g: 15.0897
+    f: 4
+  - type: pick
+    id: 316
+    x: 4
+    y: 9
+    pId: 18446744073709551822
+    g: 6.2032
+    f: 0
+  - type: pour
+    id: 238
+    x: 0
+    y: 6
+    pId: 18446744073709551183
+    g: 15.4323
+    f: 3
+  - type: move
+    id: 324
+    x: 2
+    y: 3
+  - type: pour
+    id: 831
+    x: 8
+    y: 4
+    pId: 18446744073709551132
+    g: 19.5291
+    f: 2
+  - type: pour
+    id: 281
+    x: 10
+    y: 8
+    pId: 18446744073709551775
+    g: 7.3844
+    f: 3
+  - type: pick
+    id: 170
+    x: 3
+    y: 4
+    pId: 18446744073709551697
+    g: 3.7336
+    f: 5
+  - type: pick
+    id: 792
+    x: 5
+    y: 10
+    pId: 18446744073709551219
+    g: 6.1529
+    f: 2
+  - type: move
+    id: 417
+    x: 7
+    y: 8
+  - type: pour
+    id: 367
+    x: 4
+    y: 0
+    pId: 18446744073709551248
+    g: 14.7773
+    f: 5
+  - type: move
+    id: 676
+    x: 1
+    y: 4
+  - type: pour
+    id: 481
+    x: 9
+    y: 3
+    pId: 18446744073709551978
+    g: 16.5747
+    f: 5
+  - type: pick
+    id: 802
+    x: 0
+    y: 1
+    pId: 18446744073709551381
+    g: 19.7646
+    f: 2
+  - type: pick
+    id: 205
+    x: 2
+    y: 6
+    pId: 18446744073709551853
+    g: 18.3744
+    f: 4
+  - type: pick
+    id: 609
+    x: 6
+    y: 9
+    pId: 18446744073709551476
+    g: 0.3676
+    f: 4
+  - type: pick
+    id: 213
+    x: 9
+    y: 10
+    pId: 18446744073709551551
+    g: 1.1207
+    f: 5
+  - type: move
+    id: 404
+    x: 3
+    y: 10
+  - type: move
+    id: 496
+    x: 5
+    y: 8
+  - type: pour
+    id: 795
+    x: 10
+    y: 1
+    pId: 18446744073709551446
+    g: 9.3185
+    f: 4
+  - type: move
+    id: 205
+    x: 8
+    y: 5
+    pId: 18446744073709551380
+    g: 17.5829
+    f: 5
+  - type: pick
+    id: 526
+    x: 9
+    y: 8
+    pId: 18446744073709551516
+    g: 8.0449
+    f: 0
+  - type: pour
+    id: 158
+    x: 2
+    y: 2
+    pId: 18446744073709551075
+    g: 17.3722
+    f: 4
+  - type: move
+    id: 464
+    x: 2
+    y: 6
+    pId: 18446744073709551197
+    g: 4.0366
+    f: 5
+  - type: move
+    id: 565
+    x: 6
+    y: 0
+  - type: move
+    id: 624
+    x: 8
+    y: 4
+    pId: 18446744073709551218
+    g: 10.3369
+    f: 5
+  - type: pick
+    id: 364
+    x: 2
+    y: 9
+    pId: 18446744073709551390
+    g: 12.164
+    f: 2
+  - type: pick
+    id: 990
+    x: 5
+    y: 2
+    pId: 18446744073709551816
+    g: 1.2371
+    f: 5
+  - type: move
+    id: 945
+    x: 10
+    y: 0
+    pId: 18446744073709551535
+    g: 19.287
+    f: 5
+  - type: pick
+    id: 734
+    x: 4
+    y: 1
+    pId: 18446744073709551676
+    g: 9.5854
+    f: 1
+  - type: move
+    id: 724
+    x: 7
+    y: 2
+    pId: 18446744073709551932
+    g: 18.1903
+    f: 0
+  - type: pour
+    id: 859
+    x: 3
+    y: 9
+    pId: 18446744073709551759
+    g: 5.948
+    f: 0
+  - type: pour
+    id: 641
+    x: 6
+    y: 4
+    pId: 18446744073709551071
+    g: 9.9667
+    f: 2
+  - type: pick
+    id: 608
+    x: 5
+    y: 6
+    pId: 18446744073709551757
+    g: 6.6603
+    f: 2
+  - type: move
+    id: 817
+    x: 5
+    y: 2
+  - type: move
+    id: 677
+    x: 7
+    y: 3
+  - type: pick
+    id: 394
+    x: 0
+    y: 3
+    pId: 18446744073709551427
+    g: 3.19
+    f: 5
+  - type: move
+    id: 272
+    x: 0
+    y: 6
+  - type: move
+    id: 195
+    x: 9
+    y: 5
+  - type: pour
+    id: 945
+    x: 7
+    y: 8
+    pId: 18446744073709551699
+    g: 1.308
+    f: 2
+  - type: pick
+    id: 831
+    x: 6
+    y: 10
+    pId: 18446744073709551045
+    g: 13.0179
+    f: 3
+  - type: move
+    id: 311
+    x: 2
+    y: 4
+    pId: 18446744073709551957
+    g: 14.9699
+    f: 1
+  - type: move
+    id: 675
+    x: 0
+    y: 8
+  - type: move
+    id: 408
+    x: 4
+    y: 4
+  - type: move
+    id: 938
+    x: 2
+    y: 1
+    pId: 18446744073709551906
+    g: 15.746
+    f: 1
+  - type: pour
+    id: 364
+    x: 10
+    y: 5
+    pId: 18446744073709551471
+    g: 4.4755
+    f: 0
+  - type: pick
+    id: 780
+    x: 9
+    y: 7
+    pId: 18446744073709551930
+    g: 1.8883
+    f: 0
+  - type: pick
+    id: 838
+    x: 0
+    y: 7
+    pId: 18446744073709551640
+    g: 12.0705
+    f: 3
+  - type: move
+    id: 998
+    x: 1
+    y: 5
+    pId: 18446744073709551186
+    g: 9.5312
+    f: 0
+  - type: pick
+    id: 371
+    x: 8
+    y: 4
+    pId: 18446744073709551685
+    g: 15.594
+    f: 0
+  - type: move
+    id: 706
+    x: 0
+    y: 3
+    pId: 18446744073709551949
+    g: 14.5445
+    f: 3
+  - type: pour
+    id: 600
+    x: 2
+    y: 6
+    pId: 18446744073709551073
+    g: 13.6946
+    f: 5
+  - type: pick
+    id: 817
+    x: 2
+    y: 2
+    pId: 18446744073709551058
+    g: 4.6473
+    f: 2
+  - type: pick
+    id: 343
+    x: 0
+    y: 4
+    pId: 18446744073709551011
+    g: 17.0352
+    f: 5
+  - type: pick
+    id: 528
+    x: 10
+    y: 3
+    pId: 18446744073709551886
+    g: 12.0663
+    f: 0
+  - type: move
+    id: 346
+    x: 1
+    y: 2
+    pId: 18446744073709551363
+    g: 9.8479
+    f: 5
+  - type: move
+    id: 730
+    x: 3
+    y: 5
+  - type: move
+    id: 759
+    x: 3
+    y: 6
+  - type: move
+    id: 369
+    x: 1
+    y: 9

@@ -23,7 +23,7 @@ function withSource<T>(source: string) {
 const getFeatures = async ({ transport, url }: Connection) => {
   return _(
     await mapAsync(
-      ["algorithms", "formats", "maps", "traces"] as const,
+      ["algorithms", "formats", "maps", "traces", "problemTypes"] as const,
       async (prop) => {
         const { result } = await timed(
           () => transport().call(`features/${prop}`),
@@ -57,6 +57,7 @@ export function FeaturesService() {
               })),
               traces: [],
               maps: [],
+              problemTypes: [],
             },
           };
           const reload = () => {
