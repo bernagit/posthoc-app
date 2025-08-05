@@ -6,8 +6,9 @@ import {
   TripOriginOutlined as StartIcon,
   PottedPlantOutlined as PlantIcon,
   WaterDropOutlined as WaterIcon,
+  DeleteOutlined as DeleteIcon,
 } from "@mui-symbols-material/w400";
-import { Box, Typography as Type } from "@mui/material";
+import { Box, TextField, Typography as Type } from "@mui/material";
 import { FeaturePicker } from "components/app-bar/FeaturePicker";
 import { useSnackbar } from "components/generic/Snackbar";
 import { Heading, Option } from "components/layer-editor/Option";
@@ -65,8 +66,21 @@ export type QueryLayerData = {
   query?: any;
   start?: number;
   end?: number;
-  plants?: number[];
+  plants: number[];         // List of [x, y] plant coordinates
+  pourAmounts: number[];
   taps?: number[];
+  algorithm?: string;
+} & TraceLayerData;
+
+
+export type PlantQueryLayerData = {
+  mapLayerKey?: string;
+  query?: any;
+  start?: number;
+  end?: number;
+  plants: number[][];
+  pourAmounts: number[];
+  taps?: number[][];
   algorithm?: string;
 } & TraceLayerData;
 
@@ -163,20 +177,41 @@ export const controller = {
         <Box sx={{ height: 240, mx: -2 }}>
           <TracePreview trace={value?.source?.trace?.content} />
         </Box>
+        {(value?.source?.plants ?? []).map((plant, i) => (
+          <Option
+            key={`plant-pour-${i}`}
+            label={`Plant ${i + 1} at (${plant})`}
+            content={
+              <TextField
+                type="number"
+                size="small"
+                label="Poured amount"
+                value={value?.source?.pourAmounts?.[i] ?? 0}
+                onChange={(e) => {
+                  const newVal = parseInt(e.target.value || "0", 10);
+                  produce((v) => {
+                    set(v, `source.pourAmounts.${i}`, newVal);
+                  });
+                }}
+                sx={{ width: 100 }}
+              />
+            }
+          />
+        ))}
       </>
     );
   }),
   service: withProduce(({ value, produce, onChange }) => {
     const TraceLayerService = traceController.service;
     const notify = useSnackbar();
-    const { algorithm, mapLayerKey, start, end, plants, taps } = value?.source ?? {};
-    if (!algorithm || !mapLayerKey || !start || !end) {
-      return (
-        <Type variant="body2" color="text.secondary">
-          Select an algorithm and a map layer to run a query.
-        </Type>
-      );
-    }
+    const { algorithm, mapLayerKey, start, end, plants, taps, pourAmounts } = value?.source ?? {};
+    // if (!algorithm || !mapLayerKey || !start || !end) {
+    //   return (
+    //     <Type variant="body2" color="text.secondary">
+    //       Select an algorithm and a map layer to run a query.
+    //     </Type>
+    //   );
+    // }
     const [{ layers: layers }] = useLayers();
     const [connections] = useConnections();
     const [{ algorithms }] = useFeatures();
@@ -212,6 +247,7 @@ export const controller = {
                     end: end ?? 0,
                     plants: plants ?? [],
                     taps: taps ?? [],
+                    pourAmounts: pourAmounts ?? [],
                   },
                 ],
                 mapURI: `map:${encodeURIComponent(content)}` as const,
@@ -243,12 +279,14 @@ export const controller = {
         algorithm,
         start,
         end,
+        taps,
+        plants,
         produce,
         notify,
         value,
         algorithms,
       ],
-      [mapLayer, mapContent, connections, algorithm, start, end]
+      [mapLayer, mapContent, connections, algorithm, start, end, taps, plants]
     );
     return <>{<TraceLayerService value={value} onChange={onChange} />}</>;
   }),
@@ -256,7 +294,7 @@ export const controller = {
   provideSelectionInfo: ({ children, event, layer: key }) => {
     const TraceLayerSelectionInfoProvider =
       traceController.provideSelectionInfo;
-    const { layer, setLayer, layers } = useLayer<QueryLayerData>(key);
+    const { layer, setLayer, layers } = useLayer<PlantQueryLayerData>(key);
     const mapLayerData = useMemo(() => {
       const filteredLayers = filter(layers, {
         source: { type: "map" },
@@ -354,6 +392,24 @@ export const controller = {
                       ),
                     icon: <WaterIcon />
                   },
+                  [`${key}-${next?.key}-clear`]: {
+                    primary: `Clear`,
+                    secondary: next?.name,
+                    action: () =>
+                      setLayer(
+                        produce(layer, (l) => {
+                          set(l, "source.start", undefined);
+                          set(l, "source.end", undefined);
+                          set(l, "source.plants", []);
+                          set(l, "source.taps", []);
+                          set(l, "source.query", undefined);
+                          set(l, "source.mapLayerKey", next?.key);
+                          set(l, "source.trace", undefined);
+                          // TOFIX empty also pourAmounts (don't know how to do from here)
+                        })
+                      ),
+                    icon: <DeleteIcon />,
+                  },
                 }),
                 {}
               ),
@@ -397,4 +453,4 @@ export const controller = {
       ...traceController.getSources(layer),
     ];
   },
-} satisfies LayerController<"query", QueryLayerData>;
+} satisfies LayerController<"query", PlantQueryLayerData>

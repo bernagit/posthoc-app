@@ -46,11 +46,16 @@ export const searchEventAliases = thru(
   {
     source: ["source", "start"],
     destination: ["destination", "goal", "finish"],
-    updating: ["update", "updating"],
-    expanding: ["expanding", "expanding"],
-    generating: ["generate", "generating", "open", "opening"],
-    closing: ["close", "closing"],
-    end: ["finish", "end", "solution"],
+    plant: ["plant", "planting"],
+    tap: ["tap", "tapping"],
+    move: ["move", "moving"],
+    pour: ["pour", "pouring"],
+    pick: ["pick", "picking"],
+    // updating: ["update", "updating"],
+    // expanding: ["expanding", "expanding"],
+    // generating: ["generate", "generating", "open", "opening"],
+    // closing: ["close", "closing"],
+    // end: ["finish", "end", "solution"],
   },
   (dict) => {
     const out: Dictionary<string> = {};
@@ -62,16 +67,19 @@ export const searchEventAliases = thru(
 );
 
 export const colorsHex: EventTypeColors = {
-  source: green["A400"],
+  source: green["500"],
   destination: red["A400"],
-  updating: orange[tint],
-  expanding: deepPurple[tint],
-  generating: amber[tint],
-  closing: pink[tint],
-  end: blue["A400"],
-  move: blue["A400"],
-  pour: green["A400"],
-  pick: red["A400"],
+  plant: green["900"],
+  tap: blue["200"],
+  move: orange["A400"],
+  pour: green["900"], // same as plant, otherwise it cover the plant color
+  pick: blue["200"], // same as tap, otherwise it cover the tap color
+  // updating: orange[tint],
+  // expanding: deepPurple[tint],
+  // generating: amber[tint],
+  // closing: pink[tint],
+  // end: blue["A400"],
+
 };
 
 export const colors: { [K in TraceEventType]: number } = mapValues(
