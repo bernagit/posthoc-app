@@ -51,11 +51,11 @@ export const searchEventAliases = thru(
     move: ["move", "moving"],
     pour: ["pour", "pouring"],
     pick: ["pick", "picking"],
-    // updating: ["update", "updating"],
-    // expanding: ["expanding", "expanding"],
-    // generating: ["generate", "generating", "open", "opening"],
-    // closing: ["close", "closing"],
-    // end: ["finish", "end", "solution"],
+    updating: ["update", "updating"],
+    expanding: ["expanding", "expanding"],
+    generating: ["generate", "generating", "open", "opening"],
+    closing: ["close", "closing"],
+    end: ["finish", "end", "solution"],
   },
   (dict) => {
     const out: Dictionary<string> = {};
@@ -74,11 +74,11 @@ export const colorsHex: EventTypeColors = {
   move: orange["A400"],
   pour: green["900"], // same as plant, otherwise it cover the plant color
   pick: blue["200"], // same as tap, otherwise it cover the tap color
-  // updating: orange[tint],
-  // expanding: deepPurple[tint],
-  // generating: amber[tint],
-  // closing: pink[tint],
-  // end: blue["A400"],
+  updating: orange[tint],
+  expanding: deepPurple[tint],
+  generating: amber[tint],
+  closing: pink[tint],
+  end: blue["A400"],
 
 };
 
